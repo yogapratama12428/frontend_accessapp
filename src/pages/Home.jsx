@@ -1,155 +1,217 @@
 import axios from "axios"
 import { usePenghuni } from "../hooks/usePenghuni"
 import { useState } from "react"
-import { useIdzinPenghuni } from "../hooks/useIdzinPenghuni"
+
 import {
     Button,
     Dialog,
     DialogHeader,
     DialogBody,
     DialogFooter,
-  } from "@material-tailwind/react";
+    Input,
+    Spinner,
+} from "@material-tailwind/react";
 
 const Home = () => {
 
-  const [buttonstate, setButtonState] = useState(false)
+    // eslint-disable-next-line no-unused-vars
+    const [buttonstate, setButtonState] = useState(false)
 
-  const [notif, setNotif] = useState(false);
+    const [notif, setNotif] = useState("meminta akses");
+    const [isLoadingNotif, setIsLoadingNotif] = useState(true)
+    const [isErrorNotif, setIsErrorNotif] = useState("")
 
-  const [open, setOpen] = useState(false);
- 
-  const handleOpen = () => setOpen(!open);
 
-  const handleRequestMasuk = async (penghuniId) => {
 
-        setOpen(true)
+    const [open, setOpen] = useState(false);
 
-        console.log(penghuniId)
+    const [pegunjung, setPengunjung] = useState("")
+    const [kepentingan, setKepentingan] = useState("")
 
+    const handleOpen = () => setOpen(!open);
+
+    const handleFillKepentingan = (e) => {
+        console.log(e.target.value)
+        setKepentingan(e.target.value)
+    }
+
+    const handleRequestMasuk = async (penghuniId, pengunjung, kepentingan) => {
+
+        // setOpen(true)
+
+        console.log("penghuniId: " + penghuniId)
+        console.log("pengunjung: " + pengunjung)
+        console.log("kepentingan: " + kepentingan)
+
+        // status --> [memanggil, akses diterima, akses ditolak]
         await axios.post('http://localhost:3000/api/v1/pengunjung', {
-            name: 'Danu',
-            penghuniId: penghuniId
-        }, { 
+            name: pengunjung,
+            penghuniId: penghuniId,
+            kepentingan,
+            status: "memanggil"
+        }, {
             headers: {
                 'Content-Type': 'application/json',
             }
-        }).then((response)=> {
+        }).then((response) => {
             console.log(response.data)
-            setTimeout( async ()=> {
-                const response_penghuni = await axios.get(
-                `http://localhost:3000/api/v1/penghuni/${response.data.id}`) 
-                console.log(response_penghuni.data)
+            setInterval(async () => {
 
-                if(response_penghuni.data.status !== 'memanggil') {
-                    setNotif(true)
-                }    
+                try {
+
+                    setIsErrorNotif("")
+                    const response_penghuni = await axios.get(
+                        `http://localhost:3000/api/v1/pengunjung/${response.data.id}`)
+                    console.log(response_penghuni.data)
+
+                    if (response_penghuni.data.status === 'akses diterima') {
+                        setNotif("akses disetujui")
+                    } else {
+                        setNotif("akses ditolak")
+                    }
+                } catch (error) {
+                    console.error(error)
+                    setIsErrorNotif(error)
+                } finally {
+                    setIsLoadingNotif(false)
+                }
 
             }, 10000)
-        }).catch(()=> {
+        }).catch(() => {
             console.log('error while fetching')
-        }).finally(()=>{
+        }).finally(() => {
             console.log('success')
+            setIsLoadingNotif(true)
         })
 
-        setOpen(false)
-  }
+        // setOpen(false)
+    }
 
-  const { data, loading, error } = usePenghuni('http://localhost:3000/api/v1/penghuni')
+    const { data, loading, error } = usePenghuni('http://localhost:3000/api/v1/penghuni')
 
-  let content
+    let content
+
+    // onClick = {() => handleRequestMasuk(penghuni.id)}
+
+    if (loading) {
+        console.log(loading)
+        content = (<div> Loading...</div>)
+    } if (error) {
+        console.log(error)
+    } else {
+        console.log(data)
+        content = (
+            <>
+                {data && data.map((penghuni) => {
+                    return (
+                        <>
+
+                            <button
+                                className="border-2 rounded-md w-full h-36 hover:bg-slate-400"
+                                key={penghuni.id}
+                                onClick={handleOpen}
+                            >
+                                <div className="grid place-content-center ">
+                                    <p className="font-bold text-2xl  ">
+                                        {penghuni.alamat}
+                                    </p>
+                                </div>
+                            </button>
+
+                            <Dialog open={open} >
+                                <DialogHeader>Form Pengunjung</DialogHeader>
+
+                                <DialogBody>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
+                                        <Input label="Kepentingan" onChange={handleFillKepentingan} />
+
+                                        {
+                                            isLoadingNotif ? (
+                                                <>
+                                                    <Spinner className="h-5 w-5" />
+                                                </>
+                                            ) :
+                                                <>
+                                                    {
+                                                        notif
+                                                    }
+                                                </>
+                                        }
+                                    </div>
+
+
+                                </DialogBody>
+                                <DialogFooter>
+                                    <Button
+                                        variant="text"
+                                        color="red"
+
+                                        className="mr-1"
+                                        onClick={handleOpen}
+                                    >
+                                        <span>Cancel</span>
+                                    </Button>
+                                    <Button variant="gradient" color="green" onClick={() => handleRequestMasuk(penghuni.id, pegunjung, kepentingan)}>
+                                        <span>Meminta Akses</span>
+                                    </Button>
+                                </DialogFooter>
+                            </Dialog>
+
+                        </>
+                    )
+                }
+
+                )}
 
 
 
-  if (loading) {
-    console.log(loading)
-    content =  ( <div> Loading...</div> )
-  } if (error) {
-    console.log(error)
-  } else {
-    console.log(data)
-    content = (
-    <>
-        {data && data.map((penghuni) => (
-          <button 
-            className="border-2 rounded-md w-full h-36 hover:bg-slate-400" 
-            onClick={()=> handleRequestMasuk(penghuni.id)} key={penghuni.id} >
-            <div className="grid place-content-center ">
-              <p className="font-bold text-2xl  ">
-                {penghuni.alamat}
-              </p>
-            </div>
-          </button>
-        ))}
+            </>
+        )
 
 
-        
-    </> 
-    )
+    }
 
-    
-  }
-
-  return (
-    <div className=" bg-gray-900 h-screen text-white">
-        <div className="w-full flex flex-col gap-4">
-            <div>
-                <h1 className="text-2xl font-bold text-center ">
-                    Welcome To Smart Gate Apps
-                </h1>
-            </div>
-        
-            <div className="w-full  rounded-xl ">
-            
-                <div className="text-center ">
-                    Silahkan Pilih Alamat Tujuan
+    return (
+        <div className=" bg-gray-900 h-screen text-white">
+            <div className="w-full flex flex-col gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-center ">
+                        Welcome To Smart Gate Apps
+                    </h1>
                 </div>
-          
-                <div className="grid grid-cols-3 gap-2 p-10 ">
-                    {
-                        content
-                    }
-                </div>
 
-                <>
-                    <Dialog open={open} handler={handleOpen}>
-                        <DialogHeader>Its a simple dialog.</DialogHeader>
-                        <DialogBody>
+                <div className="w-full  rounded-xl ">
+
+                    <div className="text-center ">
+                        Silahkan Pilih Alamat Tujuan
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 p-10 ">
                         {
-                            notif ? "akses disetujui" : "akses tidak disetujui"
+                            content
                         }
-                        </DialogBody>
-                        <DialogFooter>
-                        <Button
-                            variant="text"
-                            color="red"
-                            onClick={handleOpen}
-                            className="mr-1"
-                        >
-                            <span>Cancel</span>
-                        </Button>
-                        <Button variant="gradient" color="green" onClick={handleOpen}>
-                            <span>Confirm</span>
-                        </Button>
-                        </DialogFooter>
-                    </Dialog>
-                </>
+                    </div>
 
-                <div
-                    className="w-full border-2 rounded-xl py-2 px-5 text-center hover:bg-slate-400 font-bold text-lg"  
-                    onClick={handleOpen} 
+
+
+                    <div
+                        className="w-full border-2 rounded-xl py-2 px-5 text-center hover:bg-slate-400 font-bold text-lg"
+                        onClick={handleOpen}
                     >
-                    
-                    {
-                        buttonstate ? 'Masuk' : 'Idzin Masuk'
-                    }
-                   
-                </div>
-            </div>
 
-            
+                        {
+                            buttonstate ? 'Masuk' : 'Idzin Masuk'
+                        }
+
+                    </div>
+                </div>
+
+
+            </div>
         </div>
-    </div>
-  )
+    )
 }
 
 export default Home
