@@ -25,10 +25,14 @@ const Home = () => {
 
     const [open, setOpen] = useState(false);
 
-    const [pegunjung, setPengunjung] = useState("")
+    const [pengunjung, setPengunjung] = useState("")
     const [kepentingan, setKepentingan] = useState("")
+    const [penghuniId, setPenghuniId] = useState("")
 
-    const handleOpen = () => setOpen(!open);
+    const handleOpen = (penghuniId) => {
+        setOpen(!open)
+        setPenghuniId(penghuniId)
+    };
 
     const handleFillKepentingan = (e) => {
         console.log(e.target.value)
@@ -48,28 +52,29 @@ const Home = () => {
             name: pengunjung,
             penghuniId: penghuniId,
             kepentingan,
-            status: "memanggil"
+            status: "memanggil",
+            isCalled: true
         }, {
             headers: {
                 'Content-Type': 'application/json',
             }
         }).then((response) => {
             console.log(response.data)
-            setInterval(async () => {
+            const interval = setInterval(async () => {
 
                 try {
-
                     setIsErrorNotif("")
                     const response_penghuni = await axios.get(
                         `http://localhost:3000/api/v1/pengunjung/${response.data.id}`)
-                    console.log(response_penghuni.data)
+                    console.log(response_penghuni)
 
-                    if (response_penghuni.data.status === 'akses diterima') {
+                    if (response_penghuni.data.isCalled === true) {
                         setNotif("akses disetujui")
                     } else {
                         setNotif("akses ditolak")
                     }
                 } catch (error) {
+
                     console.error(error)
                     setIsErrorNotif(error)
                 } finally {
@@ -77,11 +82,15 @@ const Home = () => {
                 }
 
             }, 10000)
+
+            return () => clearInterval(interval);
+
         }).catch(() => {
             console.log('error while fetching')
         }).finally(() => {
             console.log('success')
             setIsLoadingNotif(true)
+            
         })
 
         // setOpen(false)
@@ -109,7 +118,7 @@ const Home = () => {
                             <button
                                 className="border-2 rounded-md w-full h-36 hover:bg-slate-400"
                                 key={penghuni.id}
-                                onClick={handleOpen}
+                                onClick={()=> handleOpen(penghuni.id)}
                             >
                                 <div className="grid place-content-center ">
                                     <p className="font-bold text-2xl  ">
@@ -117,47 +126,6 @@ const Home = () => {
                                     </p>
                                 </div>
                             </button>
-
-                            <Dialog open={open} >
-                                <DialogHeader>Form Pengunjung</DialogHeader>
-
-                                <DialogBody>
-
-                                    <div className="flex flex-col gap-2">
-                                        <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
-                                        <Input label="Kepentingan" onChange={handleFillKepentingan} />
-
-                                        {
-                                            isLoadingNotif ? (
-                                                <>
-                                                    <Spinner className="h-5 w-5" />
-                                                </>
-                                            ) :
-                                                <>
-                                                    {
-                                                        notif
-                                                    }
-                                                </>
-                                        }
-                                    </div>
-
-
-                                </DialogBody>
-                                <DialogFooter>
-                                    <Button
-                                        variant="text"
-                                        color="red"
-
-                                        className="mr-1"
-                                        onClick={handleOpen}
-                                    >
-                                        <span>Cancel</span>
-                                    </Button>
-                                    <Button variant="gradient" color="green" onClick={() => handleRequestMasuk(penghuni.id, pegunjung, kepentingan)}>
-                                        <span>Meminta Akses</span>
-                                    </Button>
-                                </DialogFooter>
-                            </Dialog>
 
                         </>
                     )
@@ -194,6 +162,46 @@ const Home = () => {
                         }
                     </div>
 
+                    <Dialog open={open} >
+                                <DialogHeader>Form Pengunjung</DialogHeader>
+
+                                <DialogBody>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
+                                        <Input label="Kepentingan" onChange={handleFillKepentingan} />
+
+                                        {
+                                            isLoadingNotif ? (
+                                                <>
+                                                    <Spinner className="h-5 w-5" />
+                                                </>
+                                            ) :
+                                                <>
+                                                    {
+                                                        notif
+                                                    }
+                                                </>
+                                        }
+                                    </div>
+
+
+                                </DialogBody>
+                                <DialogFooter>
+                                    <Button
+                                        variant="text"
+                                        color="red"
+
+                                        className="mr-1"
+                                        onClick={handleOpen}
+                                    >
+                                        <span>Cancel</span>
+                                    </Button>
+                                    <Button variant="gradient" color="green" onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
+                                        <span>Meminta Akses</span>
+                                    </Button>
+                                </DialogFooter>
+                            </Dialog>
 
 
                     <div
