@@ -48,7 +48,7 @@ const Home = () => {
         console.log("kepentingan: " + kepentingan)
 
         // status --> [memanggil, akses diterima, akses ditolak]
-        await axios.post('http://localhost:3000/api/v1/pengunjung', {
+        await axios.post('https://backend-accessapp.vercel.app/api/v1/pengunjung', {
             name: pengunjung,
             penghuniId: penghuniId,
             kepentingan,
@@ -65,7 +65,7 @@ const Home = () => {
                 try {
                     setIsErrorNotif("")
                     const response_penghuni = await axios.get(
-                        `http://localhost:3000/api/v1/pengunjung/${response.data.id}`)
+                        `https://backend-accessapp.vercel.app/api/v1/pengunjung/${response.data.id}`)
                     console.log(response_penghuni)
 
                     if (response_penghuni.data.isCalled === true) {
@@ -90,13 +90,13 @@ const Home = () => {
         }).finally(() => {
             console.log('success')
             setIsLoadingNotif(true)
-            
+
         })
 
         // setOpen(false)
     }
 
-    const { data, loading, error } = usePenghuni('http://localhost:3000/api/v1/penghuni')
+    const { data, loading, error } = usePenghuni('https://backend-accessapp.vercel.app/api/v1/penghuni')
 
     let content
 
@@ -118,7 +118,7 @@ const Home = () => {
                             <button
                                 className="border-2 rounded-md w-full h-36 hover:bg-slate-400"
                                 key={penghuni.id}
-                                onClick={()=> handleOpen(penghuni.id)}
+                                onClick={() => handleOpen(penghuni.id)}
                             >
                                 <div className="grid place-content-center ">
                                     <p className="font-bold text-2xl  ">
@@ -163,45 +163,45 @@ const Home = () => {
                     </div>
 
                     <Dialog open={open} >
-                                <DialogHeader>Form Pengunjung</DialogHeader>
+                        <DialogHeader>Form Pengunjung</DialogHeader>
 
-                                <DialogBody>
+                        <DialogBody>
 
-                                    <div className="flex flex-col gap-2">
-                                        <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
-                                        <Input label="Kepentingan" onChange={handleFillKepentingan} />
+                            <div className="flex flex-col gap-2">
+                                <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
+                                <Input label="Kepentingan" onChange={handleFillKepentingan} />
 
-                                        {
-                                            isLoadingNotif ? (
-                                                <>
-                                                    <Spinner className="h-5 w-5" />
-                                                </>
-                                            ) :
-                                                <>
-                                                    {
-                                                        notif
-                                                    }
-                                                </>
-                                        }
-                                    </div>
+                                {
+                                    isLoadingNotif ? (
+                                        <>
+                                            <Spinner className="h-5 w-5" />
+                                        </>
+                                    ) :
+                                        <>
+                                            {
+                                                notif
+                                            }
+                                        </>
+                                }
+                            </div>
 
 
-                                </DialogBody>
-                                <DialogFooter>
-                                    <Button
-                                        variant="text"
-                                        color="red"
+                        </DialogBody>
+                        <DialogFooter>
+                            <Button
+                                variant="text"
+                                color="red"
 
-                                        className="mr-1"
-                                        onClick={handleOpen}
-                                    >
-                                        <span>Cancel</span>
-                                    </Button>
-                                    <Button variant="gradient" color="green" onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
-                                        <span>Meminta Akses</span>
-                                    </Button>
-                                </DialogFooter>
-                            </Dialog>
+                                className="mr-1"
+                                onClick={handleOpen}
+                            >
+                                <span>Cancel</span>
+                            </Button>
+                            <Button variant="gradient" color="green" onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
+                                <span>Meminta Akses</span>
+                            </Button>
+                        </DialogFooter>
+                    </Dialog>
 
 
                     <div
