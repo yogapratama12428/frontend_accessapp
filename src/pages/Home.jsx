@@ -36,6 +36,8 @@ const Home = () => {
     const handleOpen = (penghuniId) => {
         setOpen(!open)
         setPenghuniId(penghuniId)
+        setDisableButton(false)
+        setDisableButtonCancel(true)
     };
 
     const handleFillKepentingan = (e) => {
@@ -65,11 +67,9 @@ const Home = () => {
         }).then((response) => {
             console.log(response.data)
             setPengunjungId(response.data.id)
-            setInterval(async () => {
-
                 try {
                     setIsErrorNotif("")
-                    const response_penghuni = await axios.get(
+                    const response_penghuni = axios.get(
                         `https://backend-accessapp.vercel.app/api/v1/pengunjung/${response.data.id}`)
                     console.log(response_penghuni)
 
@@ -81,25 +81,19 @@ const Home = () => {
                         setDisableButtonCancel(false)
                     }
                 } catch (error) {
-
                     console.error(error)
                     setIsErrorNotif(error)
                 } finally {
                     setIsLoadingNotif(false)
-                }
-
-            }, 60000)
+                }     
         }).catch(() => {
             console.log('error while fetching')
         }).finally(() => {
             console.log('success')
             setIsLoadingNotif(true)
-            
-        })
-
-        setDisableButton(true)
-       
-       
+            setDisableButton(false)
+            setDisableButtonCancel(true)
+        })       
     }
 
     const handleRequestKeluar = async (penghuniId, pengunjung, kepentingan) => {
@@ -145,7 +139,7 @@ const Home = () => {
                     setIsLoadingNotif(false)
                 }
 
-            }, 60000)
+            }, 1000)
 
             return () => clearInterval(interval);
 
