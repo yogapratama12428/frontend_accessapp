@@ -1,6 +1,6 @@
 import axios from "axios"
 import { usePenghuni } from "../hooks/usePenghuni"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 import {
     Button,
@@ -24,7 +24,7 @@ const Home = () => {
     const [isLoadingNotif, setIsLoadingNotif] = useState(true)
     const [isErrorNotif, setIsErrorNotif] = useState("")
 
-
+   
 
     const [open, setOpen] = useState(false);
 
@@ -70,7 +70,7 @@ const Home = () => {
                 try {
                     setIsErrorNotif("")
                     const response_penghuni = await axios.get(
-                        `http://localhost:3000/api/v1/pengunjung/${response.data.id}`)
+                        `https://backend-accessapp.vercel.app/api/v1/pengunjung/${response.data.id}`)
                     console.log(response_penghuni)
 
                     if (response_penghuni.data.status === "akses diterima") {
@@ -109,7 +109,7 @@ const Home = () => {
         console.log("kepentingan: " + kepentingan)
 
         // status --> [memanggil, akses diterima, akses ditolak]
-        await axios.post('http://localhost:3000/api/v1/pengunjung', {
+        await axios.post('https://backend-accessapp.vercel.app/api/v1/pengunjung', {
             name: pengunjung,
             penghuniId: penghuniId,
             kepentingan,
@@ -160,12 +160,8 @@ const Home = () => {
        
     }
 
-    const handleRefatching = async () => {
-
-    }
-
     const handleCancel = async () => {
-        await axios.put(`http://localhost:3000/api/v2/pengunjung/${pengunjungId}`, {
+        await axios.put(`https://backend-accessapp.vercel.app/api/v2/pengunjung/${pengunjungId}`, {
             status: "panggilan dibatalkan",
             isCalled: false,
         }, {
@@ -205,7 +201,6 @@ const Home = () => {
                 {data && data.map((penghuni) => {
                     return (
                         <>
-<<<<<<< HEAD
                             {
                                 penghuni.isVeryfied && (
                                     <button
@@ -221,21 +216,6 @@ const Home = () => {
                                     </button>
                                 )
                             }
-=======
-
-                            <button
-                                className="border-2 rounded-md w-full h-36 hover:bg-slate-400"
-                                key={penghuni.id}
-                                onClick={() => handleOpen(penghuni.id)}
-                            >
-                                <div className="grid place-content-center ">
-                                    <p className="font-bold text-2xl  ">
-                                        {penghuni.alamat}
-                                    </p>
-                                </div>
-                            </button>
-
->>>>>>> dc5506ac4fbf0c49b521edac77e889fb14d1b4e9
                         </>
                     )
                 }
@@ -272,7 +252,6 @@ const Home = () => {
                     </div>
 
                     <Dialog open={open} >
-<<<<<<< HEAD
                         <DialogHeader className="flex justify-between">
                             Form Pengunjung
 
@@ -313,7 +292,7 @@ const Home = () => {
                                     >
                                         <span>Cancel</span>
                                     </Button>
-                                    <Button variant="gradient" color="green" disabled={disableButton ? true : false} onClick={() => {handleRequestMasuk(penghuniId, pengunjung, kepentingan), setIsOut(true)}}>
+                                    <Button variant="gradient" color="green" disabled={disableButton ? true : false} onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
                                         <span>Meminta Akses Masuk</span>
                                     </Button>
 
@@ -322,46 +301,6 @@ const Home = () => {
                                     </Button>
                                 </div>
                             </DialogFooter>
-=======
-                        <DialogHeader>Form Pengunjung</DialogHeader>
-
-                        <DialogBody>
-
-                            <div className="flex flex-col gap-2">
-                                <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
-                                <Input label="Kepentingan" onChange={handleFillKepentingan} />
-
-                                {
-                                    isLoadingNotif ? (
-                                        <>
-                                            <Spinner className="h-5 w-5" />
-                                        </>
-                                    ) :
-                                        <>
-                                            {
-                                                notif
-                                            }
-                                        </>
-                                }
-                            </div>
-
-
-                        </DialogBody>
-                        <DialogFooter>
-                            <Button
-                                variant="text"
-                                color="red"
-
-                                className="mr-1"
-                                onClick={handleOpen}
-                            >
-                                <span>Cancel</span>
-                            </Button>
-                            <Button variant="gradient" color="green" onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
-                                <span>Meminta Akses</span>
-                            </Button>
-                        </DialogFooter>
->>>>>>> dc5506ac4fbf0c49b521edac77e889fb14d1b4e9
                     </Dialog>
 
 
