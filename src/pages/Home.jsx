@@ -24,7 +24,7 @@ const Home = () => {
     const [isLoadingNotif, setIsLoadingNotif] = useState(true)
     const [isErrorNotif, setIsErrorNotif] = useState("")
 
-   
+
 
     const [open, setOpen] = useState(false);
 
@@ -67,9 +67,11 @@ const Home = () => {
         }).then((response) => {
             console.log(response.data)
             setPengunjungId(response.data.id)
+
+            const timeout = setTimeout(async () => {
                 try {
                     setIsErrorNotif("")
-                    const response_penghuni = axios.get(
+                    const response_penghuni = await axios.get(
                         `https://backend-accessapp.vercel.app/api/v1/pengunjung/${response.data.id}`)
                     console.log(response_penghuni)
 
@@ -85,15 +87,20 @@ const Home = () => {
                     setIsErrorNotif(error)
                 } finally {
                     setIsLoadingNotif(false)
-                }     
+                }
+            }, 10000)
+
+            return () => clearTimeout(timeout)
+
         }).catch(() => {
             console.log('error while fetching')
         }).finally(() => {
             console.log('success')
             setIsLoadingNotif(true)
-            setDisableButton(false)
-            setDisableButtonCancel(true)
-        })       
+            //setDisableButton(false)
+            //setDisableButtonCancel(true)
+        })
+        setDisableButton(true)
     }
 
     const handleRequestKeluar = async (penghuniId, pengunjung, kepentingan) => {
@@ -116,7 +123,7 @@ const Home = () => {
             }
         }).then((response) => {
             console.log(response.data)
-            const interval = setInterval(async () => {
+            const timeout = setTimeout(async () => {
 
                 try {
                     setIsErrorNotif("")
@@ -139,9 +146,9 @@ const Home = () => {
                     setIsLoadingNotif(false)
                 }
 
-            }, 1000)
+            }, 10000)
 
-            return () => clearInterval(interval);
+            return () => clearTimeout(timeout);
 
         }).catch(() => {
             console.log('error while fetching')
@@ -151,7 +158,7 @@ const Home = () => {
 
         })
         setDisableButton(true)
-       
+
     }
 
     const handleCancel = async () => {
@@ -168,8 +175,8 @@ const Home = () => {
             console.log('error while fetching')
         }).finally(() => {
             console.log('success')
-            setIsLoadingNotif(true)
-            
+            setIsLoadingNotif(false)
+
         })
 
         setDisableButton(false)
@@ -200,7 +207,7 @@ const Home = () => {
                                     <button
                                         className="border-2 rounded-md w-full h-36 hover:bg-slate-400"
                                         key={penghuni.id}
-                                        onClick={()=> handleOpen(penghuni.id)}
+                                        onClick={() => handleOpen(penghuni.id)}
                                     >
                                         <div className="grid place-content-center ">
                                             <p className="font-bold text-2xl  ">
@@ -215,9 +222,6 @@ const Home = () => {
                 }
 
                 )}
-
-
-
             </>
         )
 
@@ -254,47 +258,47 @@ const Home = () => {
                             </button>
 
                         </DialogHeader>
-                            <DialogBody>
-                                    <div className="flex flex-col gap-2">
-                                        <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
-                                        <Input label="Kepentingan" onChange={handleFillKepentingan} />
+                        <DialogBody>
+                            <div className="flex flex-col gap-2">
+                                <Input label="Nama Pengunjung" onChange={e => setPengunjung(e.target.value)} />
+                                <Input label="Kepentingan" onChange={handleFillKepentingan} />
 
-                                        {
-                                            isLoadingNotif ? (
-                                                <>
-                                                    <Spinner className="h-5 w-5" />
-                                                </>
-                                            ) :
-                                                <>
-                                                    {
-                                                        notif
-                                                    }
-                                                </>
-                                        }
-                                    </div>
-                            </DialogBody>
-                            <DialogFooter>
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="text"
-                                        color="red"
-                                        disabled={disableButtonCancel? true: false}
+                                {
+                                    isLoadingNotif ? (
+                                        <>
+                                            <Spinner className="h-5 w-5" />
+                                        </>
+                                    ) :
+                                        <>
+                                            {
+                                                notif
+                                            }
+                                        </>
+                                }
+                            </div>
+                        </DialogBody>
+                        <DialogFooter>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="text"
+                                    color="red"
+                                    disabled={disableButtonCancel ? true : false}
 
 
-                                        className="mr-1"
-                                        onClick={handleCancel}
-                                    >
-                                        <span>Cancel</span>
-                                    </Button>
-                                    <Button variant="gradient" color="green" disabled={disableButton ? true : false} onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
-                                        <span>Meminta Akses Masuk</span>
-                                    </Button>
+                                    className="mr-1"
+                                    onClick={handleCancel}
+                                >
+                                    <span>Cancel</span>
+                                </Button>
+                                <Button variant="gradient" color="green" disabled={disableButton ? true : false} onClick={() => handleRequestMasuk(penghuniId, pengunjung, kepentingan)}>
+                                    <span>Meminta Akses Masuk</span>
+                                </Button>
 
-                                    <Button variant="gradient" color="green" disabled={disableButton ? true : false} onClick={() => handleRequestKeluar(penghuniId, pengunjung, kepentingan)}>
-                                        <span>Meminta Akses Keluar</span>
-                                    </Button>
-                                </div>
-                            </DialogFooter>
+                                <Button variant="gradient" color="green" disabled={disableButton ? true : false} onClick={() => handleRequestKeluar(penghuniId, pengunjung, kepentingan)}>
+                                    <span>Meminta Akses Keluar</span>
+                                </Button>
+                            </div>
+                        </DialogFooter>
                     </Dialog>
 
 
